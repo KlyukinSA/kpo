@@ -25,7 +25,7 @@ bot = telebot.TeleBot(environ['KPO_TOKEN'])
 
 @bot.message_handler(commands=['start'])
 def start(message):
-    bot.send_message(message.chat.id, 'Добро пожаловать! Пожалуйста, введите значения полей в последовательных сообщениях  (age,sex,cp,trestbps,chol,fbs,restecg,thalach,exang,oldpeak,slope,ca,thal). В результате мы вам ответим предположением о наличии заболеваний. Начните вводить age.')
+    bot.send_message(message.chat.id, 'Добро пожаловать! Пожалуйста, введите значения полей в последовательных сообщениях (age,sex,cp,trestbps,chol,fbs,restecg,thalach,exang,oldpeak,slope,ca,thal). В результате мы вам ответим предположением о наличии заболеваний. Начните вводить age.')
 
 @bot.message_handler(content_types='text')
 def input_one(message):
@@ -34,19 +34,28 @@ def input_one(message):
         user_data = {}
 
     user_id = message.chat.id
-    print("user_id",user_id)
 
     if user_id not in user_data:
-        user_data[user_id] = []
+        user_data[user_id] = [] # 44,1,2,130,234,0,1,179,1,0.4,2
 
-    print(user_data[user_id])
-    user_data[user_id].append(message.text)
-    print(len(user_data[user_id]))
+    raw = message.text
+    value = None
 
-    if len(user_data[user_id]) == 13:  # Должно быть 13 полей
-        user_input = [float(value) for value in user_data[user_id]]
-        prediction = model.predict([user_input])[0]
-        bot.reply_to(message, f"Предсказанное значение целевой переменной (target): {prediction}")
+    step = len(user_data[user_id])
+    
+    # if step == 9:
+    try:
+        value = float(raw)
+    except ValueError:
+        bot.reply_to(message, 'Слушайте введите число а. Дробную часть писать через точку.')
+        return
+    
+    if value != None:
+        user_data[user_id].append(value)
+
+    if step == 12:  # Должно быть 13 полей
+        prediction = model.predict(np.array(user_data[user_id]).reshape(1, -1))[0]
+        bot.send_message(user_id, 'Вы' + (' не' if prediction == 0 else '') + ' больны')
         del user_data[user_id]
     
 bot.polling()
