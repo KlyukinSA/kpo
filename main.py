@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
+from os import environ
+import telebot
 
 data = pd.read_csv("heart.csv")
 
@@ -19,28 +21,32 @@ def cli():
     print(f"Предполагаемый результат target: {prediction}")
 
 
-from telegram import Update
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
-from os import environ
+bot = telebot.TeleBot(environ['KPO_TOKEN'])
 
-def start(update: Update, context: CallbackContext) -> None:
-    update.message.reply_text('Добро пожаловать! Пожалуйста, введите значения полей через запятую (age,sex,cp,trestbps,chol,fbs,restecg,thalach,exang,oldpeak,slope,ca,thal):')
+@bot.message_handler(commands=['start'])
+def start(message):
+    bot.send_message(message.chat.id, 'Добро пожаловать! Пожалуйста, введите значения полей в последовательных сообщениях  (age,sex,cp,trestbps,chol,fbs,restecg,thalach,exang,oldpeak,slope,ca,thal). В результате мы вам ответим предположением о наличии заболеваний. Начните вводить age.')
 
-def predict(update: Update, context: CallbackContext) -> None:
-    input_data = update.message.text
-    input_list = list(map(float, input_data.split(',')))
+@bot.message_handler(content_types='text')
+def input_one(message):
+    global user_data
+    if 'user_data' not in globals():
+        user_data = {}
 
-    prediction = model.predict([input_list])[0]
-    update.message.reply_text(f"Предполагаемый результат target: {prediction}")
+    user_id = message.chat.id
+    print("user_id",user_id)
 
-def main() -> None:
-    updater = Updater(environ['KPO_TOKEN'])
+    if user_id not in user_data:
+        user_data[user_id] = []
 
-    updater.dispatcher.add_handler(CommandHandler("start", start))
-    updater.dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, predict))
+    print(user_data[user_id])
+    user_data[user_id].append(message.text)
+    print(len(user_data[user_id]))
 
-    updater.start_polling()
-    updater.idle()
-
-if __name__ == '__main__':
-    main()
+    if len(user_data[user_id]) == 13:  # Должно быть 13 полей
+        user_input = [float(value) for value in user_data[user_id]]
+        prediction = model.predict([user_input])[0]
+        bot.reply_to(message, f"Предсказанное значение целевой переменной (target): {prediction}")
+        del user_data[user_id]
+    
+bot.polling()
