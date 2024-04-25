@@ -23,9 +23,11 @@ def cli():
 
 bot = telebot.TeleBot(environ['KPO_TOKEN'])
 
+field_descs = ["возраст", "пол (1 = М; 0 = Ж)", "тип боли в груди (4 варианта, число)", "артериальное давление в состоянии покоя", "холесторал в сыворотке, мг/дл", "уровень сахара в крови натощак > 120 мг/дл (число 0 или 1)", "результаты электрокардиографии покоя (значения 0,1,2)", "достигнута ли максимальная частота сердечных сокращений", "стенокардия, вызванная физической нагрузкой", "oldpeak = депрессия ST, вызванная физическими упражнениями, по сравнению с отдыхом", "наклон пикового сегмента ST при нагрузке", "количество магистральных сосудов (0-3), окрашенных флюороскопией", "thal: 0 = нормально; 1 = фиксированный дефект; 2 = обратимый дефект"]
+
 @bot.message_handler(commands=['start'])
 def start(message):
-    bot.send_message(message.chat.id, 'Добро пожаловать! Пожалуйста, введите значения полей в последовательных сообщениях (age,sex,cp,trestbps,chol,fbs,restecg,thalach,exang,oldpeak,slope,ca,thal). В результате мы вам ответим предположением о наличии заболеваний. Начните вводить age.')
+    bot.send_message(message.chat.id, 'Добро пожаловать! Пожалуйста, введите значения полей в последовательных сообщениях (age,sex,cp,trestbps,chol,fbs,restecg,thalach,exang,oldpeak,slope,ca,thal). В результате мы вам ответим предположением о наличии заболеваний. Начните вводить ' + field_descs[0] + '.')
 
 @bot.message_handler(content_types='text')
 def input_one(message):
@@ -53,9 +55,11 @@ def input_one(message):
     if value != None:
         user_data[user_id].append(value)
 
-    if step == 12:  # Должно быть 13 полей
+    if step == len(field_descs) - 1:
         prediction = model.predict(np.array(user_data[user_id]).reshape(1, -1))[0]
         bot.send_message(user_id, 'Вы' + (' не' if prediction == 0 else '') + ' больны')
         del user_data[user_id]
+
+    bot.send_message(user_id, 'Введите ' + field_descs[(step + 1) % len(field_descs)])
     
 bot.polling()
