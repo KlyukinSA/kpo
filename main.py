@@ -70,13 +70,13 @@ def update_filed(message):
 
 def predict(user_id):
     if 'user_data' not in globals() or user_id not in user_data:
-        bot.reply_to(message, 'Вас еще нет')
+        bot.send_message(user_id, 'Вас еще нет')
         return
     if len(user_data[user_id]) == len(field_descs):
         prediction = model.predict(np.array(user_data[user_id]).reshape(1, -1))[0]
         bot.send_message(user_id, 'Вы' + (' не' if prediction == 0 else '') + ' больны')
     else:
-        bot.reply_to(message, 'У вас еще не все поля')
+        bot.send_message(user_id, 'У вас еще не все поля')
 
 @bot.message_handler(commands=['predict'])
 def handle_predict_command(message):
