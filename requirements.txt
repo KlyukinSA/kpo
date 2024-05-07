@@ -1,0 +1,5 @@
+scikit-learn
+pyTelegramBotAPI==4.11.0
+telemulator3
+numpy
+pandas
