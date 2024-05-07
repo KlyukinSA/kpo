@@ -115,5 +115,6 @@ def input_one(message):
         predict(user_id)
     else:
         bot.send_message(user_id, 'Введите ' + field_descs[(step + 1) % len(field_descs)])
-    
-bot.polling()
+
+if __name__ == "__main__":
+    bot.polling()
