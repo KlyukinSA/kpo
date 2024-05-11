@@ -21,6 +21,8 @@
 
 Система отвечает предположением о наличии заболеваний.
 
+[Требования + Схемы](https://docs.google.com/document/d/12QD7l_MOJejAtYvzt7p5G6opsmvbHxuQfuPyr4mpCRI/edit?usp=sharing)
+
 # Участники проекта
 
 - Клюкин Степан
@@ -38,7 +40,7 @@ docker ps
 docker logs bb0b61cf6f33
 ```
 
-## Старый гайд
+## Без докера
 
 1. скачать датасет и поместить его в директорию, из которой будете запускать python: https://www.kaggle.com/datasets/johnsmith88/heart-disease-dataset?resource=download&select=heart.csv
 2. установить все библиотеки конечно. e g `pip install pyTelegramBotAPI`
