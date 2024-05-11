@@ -1,6 +1,5 @@
 from telebot import TeleBot
 from telemulator3 import Telemulator, send_command
-from time import sleep
 
 from main import bot
 
@@ -23,7 +22,6 @@ def test_main_user_scenario_predict(call_n):
         nonlocal iteration
         iteration += 2
         send_command(chat, message, user)
-        sleep(0.05)
         assert reply in str(chat.history.messages[iteration])
     # 44,1,2,130,234,0,1,179,1,0.4,2,0,2
     send_check_reply('/start', "Начните вводить возраст")
@@ -47,13 +45,10 @@ def test_update_all_scenarios(call_n):
     chat = user.private()
     send_command(chat, '42', user)
     send_command(chat, "/update age 52", user)
-    sleep(0.05)
     assert len(chat.history.messages) == 3
     send_command(chat, "/update thal 52", user)
-    sleep(0.05)
     assert 'У вас еще нет этого поля' in str(chat.history.messages[5])
     send_command(chat, "/update asd 52", user)
-    sleep(0.05)
     assert 'Нет такого поля' in str(chat.history.messages[7])
 
 test_functions = [test_main_user_scenario_predict, test_update_all_scenarios]
